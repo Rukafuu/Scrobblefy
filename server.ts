@@ -1,19 +1,15 @@
 import express from 'express';
-// Vite is imported dynamically only in development
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import axios from 'axios';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import crypto from 'crypto';
 
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Vercel handles env and paths natively
+const __dirname = path.resolve();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -298,32 +294,13 @@ app.all('/api/spotify/*', async (req, res) => {
   }
 });
 
-// Final Catch-all Proxies / Vite
-if (process.env.NODE_ENV !== 'production') {
-  const { createServer: createViteServer } = await import('vite');
-  const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'custom' });
-  app.use(vite.middlewares);
-  app.use(async (req, res, next) => {
-    if (req.method !== 'GET') return next();
-    if (req.originalUrl.startsWith('/api')) return next();
-    try {
-      let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
-      template = await vite.transformIndexHtml(req.originalUrl, template);
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
-    } catch (e) { next(e); }
-  });
-} else {
-  // Use absolute paths for Vercel
-  const distPath = path.join(process.cwd(), 'dist');
-  app.use(express.static(distPath));
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api/') || req.path.startsWith('/auth/')) return res.status(404).json({ error: 'API route not found' });
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
+// Production-only routing for Vercel
+const distPath = path.join(process.cwd(), 'dist');
+app.use(express.static(distPath));
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(Number(PORT), '0.0.0.0', () => console.log(`Server: http://0.0.0.0:${PORT}`));
-}
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/auth/')) return res.status(404).json({ error: 'API route not found' });
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 export default app;
