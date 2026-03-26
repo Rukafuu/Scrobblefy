@@ -1,5 +1,5 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
+// Vite is imported dynamically only in development
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -300,6 +300,7 @@ app.all('/api/spotify/*', async (req, res) => {
 
 // Final Catch-all Proxies / Vite
 if (process.env.NODE_ENV !== 'production') {
+  const { createServer: createViteServer } = await import('vite');
   const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'custom' });
   app.use(vite.middlewares);
   app.use(async (req, res, next) => {
@@ -312,8 +313,13 @@ if (process.env.NODE_ENV !== 'production') {
     } catch (e) { next(e); }
   });
 } else {
-  app.use(express.static(path.join(__dirname, 'dist')));
-  app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, 'dist/index.html')));
+  // Use absolute paths for Vercel
+  const distPath = path.join(process.cwd(), 'dist');
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/auth/')) return res.status(404).json({ error: 'API route not found' });
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
 }
 
 app.listen(Number(PORT), '0.0.0.0', () => console.log(`Server: http://0.0.0.0:${PORT}`));
