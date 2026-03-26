@@ -316,4 +316,4 @@ if (process.env.NODE_ENV !== 'production') {
   app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, 'dist/index.html')));
 }
 
-app.listen(PORT, () => console.log(`Server: http://localhost:${PORT}`));
+app.listen(Number(PORT), '0.0.0.0', () => console.log(`Server: http://0.0.0.0:${PORT}`));
