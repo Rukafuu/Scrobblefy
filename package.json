@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "start": "node dist/server.cjs"
+    "start": "tsx server.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.0-beta.10",
