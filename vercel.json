@@ -23,8 +23,7 @@
       "dest": "server.ts"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
