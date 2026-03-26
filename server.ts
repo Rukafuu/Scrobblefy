@@ -317,3 +317,5 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 app.listen(Number(PORT), '0.0.0.0', () => console.log(`Server: http://0.0.0.0:${PORT}`));
+
+export default app;
