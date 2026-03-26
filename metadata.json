@@ -1,0 +1,5 @@
+{
+  "name": "Scrobblefy",
+  "description": "A premium Spotify dashboard to discover your least played tracks and get personalized listening insights.",
+  "requestFramePermissions": []
+}
